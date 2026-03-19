@@ -6,10 +6,8 @@ services:
     command:
       - -config.file=/etc/promtail/promtail-config.yml
       - -config.expand-env=true
-    environment:
-      # Example: http://loki.example.com:3100/loki/api/v1/push
-      LOKI_URL: ${LOKI_URL:-http://localhost:3100/loki/api/v1/push}
-      HOSTNAME: ${HOSTNAME:-docker-host}
+    env_file:
+      - .env
     volumes:
       - ./promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       - promtail-positions:/tmp

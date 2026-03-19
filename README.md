@@ -14,19 +14,32 @@ This project runs Promtail in Docker Compose and forwards Docker container logs 
 
 ## Quick Start
 
-1. Start Promtail with your Loki URL:
+1. Create your `.env` file from the template:
 
    ```bash
-   LOKI_URL="http://your-loki-server:3100/loki/api/v1/push" docker compose up -d
+   cp .env.example .env
    ```
 
-2. Check Promtail logs:
+2. Edit `.env`:
+
+   ```env
+   LOKI_URL=http://your-loki-server:3100/loki/api/v1/push
+   HOSTNAME=my-docker-host
+   ```
+
+3. Start Promtail:
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. Check Promtail logs:
 
    ```bash
    docker compose logs -f promtail
    ```
 
-3. Stop the stack:
+5. Stop the stack:
 
    ```bash
    docker compose down
@@ -37,9 +50,9 @@ This project runs Promtail in Docker Compose and forwards Docker container logs 
 The compose file supports these environment variables:
 
 - `LOKI_URL`: Loki push API endpoint.
-- `HOSTNAME`: Label added to logs (`host`). Defaults to `docker-host`.
+- `HOSTNAME`: Label added to logs (`host`).
 
-You can pass environment variables inline or via `.env`:
+The setup uses `.env` only:
 
 ```env
 LOKI_URL=http://your-loki-server:3100/loki/api/v1/push
