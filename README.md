@@ -83,3 +83,4 @@ Or filter by container label:
 
 - This setup reads Docker json-file logs from `/var/lib/docker/containers`.
 - Promtail position state is stored in the `promtail-positions` volume.
+- If Docker discovery fails with "client version is too old", `docker-compose.yml` sets `DOCKER_API_VERSION=1.44` for compatibility.
