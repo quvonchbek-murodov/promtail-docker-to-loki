@@ -21,7 +21,7 @@ scrape_configs:
     relabel_configs:
       # Extract container ID from log file path.
       - source_labels: [filename]
-        regex: '.*/([a-f0-9]{64})/\1-json\.log'
+        regex: '.*/([a-f0-9]{64})/[a-f0-9]{64}-json\.log'
         target_label: container_id
 
     pipeline_stages:
