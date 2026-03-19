@@ -1,0 +1,20 @@
+services:
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: promtail
+    restart: unless-stopped
+    command:
+      - -config.file=/etc/promtail/promtail-config.yml
+      - -config.expand-env=true
+    environment:
+      # Example: http://loki.example.com:3100/loki/api/v1/push
+      LOKI_URL: ${LOKI_URL:-http://localhost:3100/loki/api/v1/push}
+      HOSTNAME: ${HOSTNAME:-docker-host}
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - promtail-positions:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+volumes:
+  promtail-positions:
