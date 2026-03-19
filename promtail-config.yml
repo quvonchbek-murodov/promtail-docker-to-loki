@@ -10,36 +10,19 @@ clients:
 
 scrape_configs:
   - job_name: docker
-    docker_sd_configs:
-      - host: unix:///var/run/docker.sock
-        refresh_interval: 5s
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          host: ${HOSTNAME}
+          __path__: /var/lib/docker/containers/*/*-json.log
 
     relabel_configs:
-      # Keep only running containers.
-      - source_labels: [__meta_docker_container_state]
-        regex: running
-        action: keep
-
-      # Trim leading slash from container name.
-      - source_labels: [__meta_docker_container_name]
-        regex: '/(.*)'
-        target_label: container
-        replacement: '$1'
-
-      - source_labels: [__meta_docker_container_id]
+      # Extract container ID from log file path.
+      - source_labels: [filename]
+        regex: '.*/([a-f0-9]{64})/\1-json\.log'
         target_label: container_id
-
-      - source_labels: [__meta_docker_container_log_stream]
-        target_label: stream
-
-      # Use Docker json-file log path.
-      - source_labels: [__meta_docker_container_id]
-        target_label: __path__
-        replacement: /var/lib/docker/containers/$1/$1-json.log
-
-      # Add host label for multi-node setups.
-      - target_label: host
-        replacement: ${HOSTNAME}
 
     pipeline_stages:
       - docker: {}
