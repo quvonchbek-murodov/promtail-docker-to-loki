@@ -12,6 +12,7 @@ services:
       - ./promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       - promtail-positions:/tmp
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   promtail-positions:

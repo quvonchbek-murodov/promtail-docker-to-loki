@@ -1,20 +1,15 @@
 # Promtail Docker Logs to Loki
 
-This project runs Promtail in Docker Compose and forwards Docker container logs to a Loki server.
-
-## Files
-
-- `docker-compose.yml`: Runs Promtail container and mounts Docker log sources.
-- `promtail-config.yml`: Promtail scrape and pipeline configuration for Docker logs.
+Runs a single Promtail instance that auto-discovers all Docker containers on the host and ships their logs to Loki. Each container is labeled by name — no per-service configuration needed.
 
 ## Requirements
 
 - Docker + Docker Compose
-- Loki endpoint (for example: `http://loki.example.com:3100/loki/api/v1/push`)
+- Loki endpoint (e.g. `http://loki.example.com:3100/loki/api/v1/push`)
 
 ## Quick Start
 
-1. Create your `.env` file from the template:
+1. Create your `.env` file:
 
    ```bash
    cp .env.example .env
@@ -33,54 +28,35 @@ This project runs Promtail in Docker Compose and forwards Docker container logs 
    docker compose up -d
    ```
 
-4. Check Promtail logs:
+4. Check logs:
 
    ```bash
    docker compose logs -f promtail
    ```
 
-5. Stop the stack:
-
-   ```bash
-   docker compose down
-   ```
-
 ## Configuration
 
-The compose file supports these environment variables:
+| Variable | Description |
+|----------|-------------|
+| `LOKI_URL` | Loki push API endpoint |
+| `HOSTNAME` | Label added to all logs as `host` |
 
-- `LOKI_URL`: Loki push API endpoint.
-- `HOSTNAME`: Label added to logs (`host`).
-
-The setup uses `.env` only:
-
-```env
-LOKI_URL=http://your-loki-server:3100/loki/api/v1/push
-HOSTNAME=my-docker-host
-```
-
-Then run:
-
-```bash
-docker compose up -d
-```
-
-## Verify Logs in Loki
-
-Use Grafana Explore with a query like:
+## Query Logs in Grafana
 
 ```logql
-{job="docker"}
+# All logs from a specific container
+{container="itv-msq-v2"}
+
+# All logs from a host
+{host="my-docker-host"}
+
+# Filter by container and level
+{container="itv-msq-v2"} | json | level="ERROR"
 ```
 
-Or filter by container label:
+## How It Works
 
-```logql
-{job="docker", container="your-container-name"}
-```
-
-## Notes
-
-- This setup reads Docker json-file logs from `/var/lib/docker/containers`.
-- Promtail position state is stored in the `promtail-positions` volume.
-- This setup uses file-based Docker log scraping and does not require Docker API discovery.
+- Uses **Docker service discovery** via `/var/run/docker.sock` to auto-detect all running containers
+- Each container gets a `container` label with its name (e.g. `itv-msq-v2`, `itv-auth`)
+- No config changes needed when adding or removing services — Promtail discovers them automatically
+- Position state persisted in `promtail-positions` volume (survives restarts)
